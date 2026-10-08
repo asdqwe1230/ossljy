@@ -1,0 +1,9 @@
+name: My Workflow
+on : [push, pull_request]
+
+jobs:
+  bulid2:
+    runs-on: ubuntu-;atest
+    steps:
+      - ues: actions/checkout@v3
+      - run: echo "Hello World

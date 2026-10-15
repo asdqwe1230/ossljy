@@ -1,0 +1,20 @@
+{
+  "collected_at": "2026-10-15T10:56:35.587229+00:00",
+  "period_days": 7,
+  "lead_time": {
+    "average_hours": null,
+    "merged_pr_count": 0
+  },
+  "deployment_frequency_and_failure_rate": {
+    "successful_deployments_7_days": 0,
+    "deployments_per_day": 0.0,
+    "failed_deployments_7_days": 0,
+    "total_deployments_7_days": 0,
+    "change_failure_rate_percent": null
+  },
+  "mttr": {
+    "average_recovery_hours": null,
+    "closed_incidents_count": 0,
+    "open_incidents_count": 0
+  }
+}

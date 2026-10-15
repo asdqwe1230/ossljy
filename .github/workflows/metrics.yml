@@ -1,0 +1,79 @@
+
+name: DORA Metrics Collection
+
+on:
+  pull_request:
+    types: [closed]
+  deployment_status:
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  deployments: read
+
+jobs:
+  collect-metrics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Collect GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 병합된 PR의 생성 시각과 병합 시각 수집
+          PULL_REQUESTS_JSON=$(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/pulls?state=closed&per_page=100" \
+            | jq -s 'add | map(select(.merged_at != null) |
+              {created_at: .created_at, merged_at: .merged_at})')
+
+          echo "PULL_REQUESTS_JSON=$PULL_REQUESTS_JSON" >> "$GITHUB_ENV"
+
+          # 배포 목록 수집
+          DEPLOYMENTS_JSON='['
+          FIRST=true
+
+          for ID in $(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/deployments?per_page=100" \
+            --jq '.[].id'); do
+
+            CREATED=$(gh api \
+              "repos/$GITHUB_REPOSITORY/deployments/$ID" \
+              --jq '.created_at')
+
+            STATUS=$(gh api \
+              "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" \
+              --jq '.[0].state // "unknown"')
+
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              DEPLOYMENTS_JSON+=','
+            fi
+
+            DEPLOYMENTS_JSON+="{\"created_at\":\"$CREATED\",\"status\":\"$STATUS\"}"
+          done
+
+          DEPLOYMENTS_JSON+=']'
+          echo "DEPLOYMENTS_JSON=$DEPLOYMENTS_JSON" >> "$GITHUB_ENV"
+
+      - name: Calculate DORA metrics
+        run: python scripts/collect_metrics.py
+
+      - name: Save metrics JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: dora-metrics
+          path: reports/metrics.json
+          if-no-files-found: error
+          retention-days: 30

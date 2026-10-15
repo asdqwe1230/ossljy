@@ -7,3 +7,5 @@ Git과 GitHub 사용법을 연습하기 위한 저장소입니다.
 - Git과 GitHub 사용법 익히기
 - 커밋과 푸시 과정 이해하기
 - 버전 관리 연습하기
+
+DORA Metrics 수집 테스트

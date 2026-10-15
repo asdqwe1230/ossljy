@@ -5,6 +5,8 @@ on:
   pull_request:
     types: [closed]
   deployment_status:
+  issues:
+    types: [opened, closed, reopened]
   schedule:
     - cron: "0 0 * * 1"
   workflow_dispatch:
@@ -13,6 +15,7 @@ permissions:
   contents: read
   pull-requests: read
   deployments: read
+  issues: read
 
 jobs:
   collect-metrics:
@@ -31,7 +34,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 병합된 PR의 생성 시각과 병합 시각 수집
           PULL_REQUESTS_JSON=$(gh api --paginate \
             "repos/$GITHUB_REPOSITORY/pulls?state=closed&per_page=100" \
             | jq -sc 'add | map(select(.merged_at != null) |
@@ -39,7 +41,6 @@ jobs:
 
           echo "PULL_REQUESTS_JSON=$PULL_REQUESTS_JSON" >> "$GITHUB_ENV"
 
-          # 배포 목록 수집
           DEPLOYMENTS_JSON='['
           FIRST=true
 
@@ -51,9 +52,13 @@ jobs:
               "repos/$GITHUB_REPOSITORY/deployments/$ID" \
               --jq '.created_at')
 
-            STATUS=$(gh api \
+            STATUS_DATA=$(gh api \
               "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" \
-              --jq '.[0].state // "unknown"')
+              --jq '.[0] // {state:"unknown", created_at:""} |
+                {status: .state, status_created_at: .created_at}')
+
+            STATUS=$(echo "$STATUS_DATA" | jq -r '.status')
+            STATUS_CREATED=$(echo "$STATUS_DATA" | jq -r '.status_created_at // ""')
 
             if [ "$FIRST" = true ]; then
               FIRST=false
@@ -61,19 +66,33 @@ jobs:
               DEPLOYMENTS_JSON+=','
             fi
 
-            DEPLOYMENTS_JSON+="{\"created_at\":\"$CREATED\",\"status\":\"$STATUS\"}"
+            DEPLOYMENTS_JSON+="{\"created_at\":\"$CREATED\",\"status\":\"$STATUS\",\"status_created_at\":\"$STATUS_CREATED\"}"
           done
 
           DEPLOYMENTS_JSON+=']'
           echo "DEPLOYMENTS_JSON=$DEPLOYMENTS_JSON" >> "$GITHUB_ENV"
 
+          ISSUES_JSON=$(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" \
+            | jq -sc 'add | map(select(.pull_request == null) |
+              {title: .title, labels: [.labels[] | {name: .name}],
+               state: .state, created_at: .created_at, closed_at: .closed_at})')
+
+          echo "ISSUES_JSON=$ISSUES_JSON" >> "$GITHUB_ENV"
+
       - name: Calculate DORA metrics
         run: python scripts/collect_metrics.py
 
-      - name: Save metrics JSON
+      - name: Add report to Actions summary
+        if: success()
+        run: cat reports/weekly-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save metrics and report
         uses: actions/upload-artifact@v4
         with:
           name: dora-metrics
-          path: reports/metrics.json
+          path: |
+            reports/metrics.json
+            reports/weekly-report.md
           if-no-files-found: error
           retention-days: 30

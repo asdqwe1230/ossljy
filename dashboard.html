@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DORA Metrics Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #ddd;
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        #status {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>DORA Metrics Dashboard</h1>
+    <p id="status">지표 데이터를 불러오는 중...</p>
+
+    <div class="dashboard">
+        <div class="card">
+            <h2>Lead Time</h2>
+            <div class="value" id="leadTime">-</div>
+            <p>변경사항 전달 소요 시간</p>
+        </div>
+
+        <div class="card">
+            <h2>Deployment Frequency</h2>
+            <div class="value" id="frequency">-</div>
+            <p>배포 빈도</p>
+        </div>
+
+        <div class="card">
+            <h2>MTTR</h2>
+            <div class="value" id="mttr">-</div>
+            <p>복구 소요 시간</p>
+        </div>
+
+        <div class="card">
+            <h2>Change Failure Rate</h2>
+            <div class="value" id="failureRate">-</div>
+            <p>변경 실패율</p>
+        </div>
+    </div>
+
+
+
+    <script>
+    async function loadMetrics() {
+        try {
+            const response = await fetch('./reports/metrics.json');
+
+            console.log('JSON 요청 주소:', response.url);
+            console.log('HTTP 상태:', response.status);
+
+            if (!response.ok) {
+                throw new Error(
+                     'HTTP 오류: ' + response.status + ' / ' + response.url
+                );
+            }
+            const data = await response.json();
+
+            // 1. Lead Time
+            const leadTime = data.lead_time.average_hours;
+            document.getElementById('leadTime').textContent =
+                leadTime === null ? '데이터 없음' :
+                leadTime.toFixed(2) + '시간';
+
+            // 2. Deployment Frequency
+            const deployment = data.deployment_frequency_and_failure_rate;
+            document.getElementById('frequency').textContent =
+                deployment.deployments_per_day + '회/일';
+
+            // 3. MTTR
+            const mttr = data.mttr.average_recovery_hours;
+            document.getElementById('mttr').textContent =
+                mttr === null ? '데이터 없음' :
+                mttr.toFixed(2) + '시간';
+
+            // 4. Change Failure Rate
+            const failureRate = deployment.change_failure_rate_percent;
+            document.getElementById('failureRate').textContent =
+                failureRate === null ? '데이터 없음' :
+                failureRate + '%';
+
+            document.getElementById('status').textContent =
+                '수집 일시: ' + data.collected_at;
+
+        } catch (error) {
+            document.getElementById('status').textContent =
+                '데이터 로드 실패: ' + error.message;
+        }
+    }
+
+    loadMetrics();
+</script>
+    

@@ -1,9 +1,9 @@
 {
-  "collected_at": "2026-10-26T03:00:57.176146+00:00",
+  "collected_at": "2026-10-27T15:57:53.769676+00:00",
   "period_days": 7,
   "lead_time": {
-    "average_hours": 0.01,
-    "merged_pr_count": 1
+    "average_hours": 0.05,
+    "merged_pr_count": 2
   },
   "deployment_frequency_and_failure_rate": {
     "successful_deployments_7_days": 0,

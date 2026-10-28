@@ -1,0 +1,24 @@
+name: Auto Response
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  auto-response:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Welcome new issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.issue;
+
+            await github.rest.issues.createComment({
+              ...issue,
+              body: "Thank you for creating an issue! We will review it as soon as possible."
+            });

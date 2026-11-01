@@ -1,37 +1,45 @@
+# GitHub Actions 워크플로 최적화 보고서
 
-# GitHub Actions Workflow Optimization Report
+## 1. 최적화 목표
 
-## 1. Optimization Goals
+- 여러 Python 버전을 테스트하기 위한 Matrix 전략 적용
+- 중복된 워크플로 코드를 줄이기 위한 Reusable Workflow 적용
+- Python 환경 설정 과정을 재사용하기 위한 Composite Action 적용
+- 라이브러리 설치 시간을 줄이기 위한 pip 캐싱 적용
+- 변경된 파일을 기준으로 필요한 작업만 실행하도록 조건 설정
 
-- Matrix strategy for multiple Python versions
-- Reusable Workflow to reduce duplicated workflow code
-- Composite Action to reuse Python setup steps
-- pip caching to reduce dependency installation time
-- Conditional workflow execution using changed file paths
+## 2. Matrix 테스트 결과
 
-## 2. Matrix Test
-
-| Python Version | Test Result |
+| Python 버전 | 테스트 결과 |
 |---|---|
-| 3.10 | Pending |
-| 3.11 | Pending |
-| 3.12 | Pending |
+| 3.10 | 성공 |
+| 3.11 | 성공 |
+| 3.12 | 성공 |
 
-## 3. Cache Performance Comparison
+## 3. 캐시 적용 전후 성능 비교
 
-| Measurement | Execution Time |
+| 측정 항목 | 실행 시간 |
 |---|---|
-| Without Cache | Pending |
-| With Cache | Pending |
+| 캐시 미적용 | 8초 |
+| 캐시 적용 | 8초 |
 
-Improvement Rate:
+**실행 시간 개선률: 0%**
 
-`((Without Cache - With Cache) / Without Cache) * 100`
+계산식:
 
-## 4. Results
+`((캐시 미적용 시간 - 캐시 적용 시간) / 캐시 미적용 시간) * 100`
 
-Actual execution times will be recorded after running the Cache Benchmark workflow.
+`((8 - 8) / 8) * 100 = 0%`
 
-## 5. Conclusion
+## 4. 실험 결과
 
-The workflow uses Matrix testing, Reusable Workflows, Composite Actions, and pip caching to improve CI efficiency and maintainability.
+캐시를 적용하지 않은 경우와 적용한 경우 모두 라이브러리 설치에 약 8초가 소요되었다.
+
+이번 실험에서는 캐시 적용에 따른 실행 시간 단축 효과가 나타나지 않았다. 하지만 pip 캐싱 설정을 정상적으로 완료했으며, 향후 반복적인 라이브러리 설치 과정에서 다운로드 시간을 줄이는 데 활용할 수 있다.
+
+## 5. 결론
+
+이번 프로젝트에서는 Matrix 테스트, Reusable Workflow, Composite Action, pip 캐싱 및 변경 파일 감지 기능을 활용하여 GitHub Actions 워크플로를 최적화하였다.
+
+Python 3.10, 3.11, 3.12 버전에서 모든 테스트가 성공적으로 완료되었다. 캐시 성능 비교에서는 측정된 실행 시간의 차이가 없었지만, 워크플로 코드의 재사용성과 관리 효율성을 높였다는 점에서 의미가 있다.
+

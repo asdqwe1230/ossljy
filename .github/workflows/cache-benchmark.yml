@@ -26,7 +26,7 @@ jobs:
           echo "WITHOUT_CACHE_TIME_MS=$((END - START))"
 
       - name: Run tests
-        run: pytest
+        run: python -m pytest
 
   with-cache:
     name: With pip cache
@@ -51,4 +51,4 @@ jobs:
           echo "WITH_CACHE_TIME_MS=$((END - START))"
 
       - name: Run tests
-        run: pytest
+        run: python -m pytest

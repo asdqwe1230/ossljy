@@ -27,4 +27,4 @@ jobs:
           use-cache: ${{ inputs.use-cache }}
 
       - name: Run tests
-        run: pytest
+        run: python -m pytest

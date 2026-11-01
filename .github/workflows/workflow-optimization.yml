@@ -1,0 +1,99 @@
+
+name: Workflow Optimization
+
+on:
+  push:
+    branches:
+      - main
+      - feature/workflow-optimization
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/**"
+      - ".github/actions/**"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/**"
+      - ".github/actions/**"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+      tests: ${{ steps.filter.outputs.tests }}
+      deps: ${{ steps.filter.outputs.deps }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+            tests:
+              - 'tests/**'
+            deps:
+              - 'requirements.txt'
+            workflow:
+              - '.github/workflows/**'
+              - '.github/actions/**'
+
+  test:
+    name: Python ${{ matrix.python-version }} Test
+    needs: changes
+    if: |
+      needs.changes.outputs.src == 'true' ||
+      needs.changes.outputs.tests == 'true' ||
+      needs.changes.outputs.deps == 'true' ||
+      needs.changes.outputs.workflow == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      use-cache: true
+
+  selective-deployment:
+    name: Selective Deployment
+    needs: [changes, test]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.src == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p dist
+          tar -czf dist/application.tar.gz src/
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-package
+          path: dist/application.tar.gz

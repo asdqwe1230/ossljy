@@ -1,0 +1,30 @@
+
+name: Reusable Python Test
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      use-cache:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up project
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: ${{ inputs.python-version }}
+          use-cache: ${{ inputs.use-cache }}
+
+      - name: Run tests
+        run: pytest

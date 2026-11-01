@@ -1,0 +1,34 @@
+
+name: Setup Python Project
+description: Set up Python and install project dependencies
+
+inputs:
+  python-version:
+    description: Python version
+    required: true
+    default: "3.11"
+  use-cache:
+    description: Enable pip cache
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python with cache
+      if: inputs.use-cache == 'true'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: requirements.txt
+
+    - name: Set up Python without cache
+      if: inputs.use-cache != 'true'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r requirements.txt

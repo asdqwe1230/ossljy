@@ -1,0 +1,49 @@
+name: SLA Tracking
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1-5"
+
+permissions:
+  issues: read
+
+jobs:
+  track-sla:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check open issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "open",
+                per_page: 100
+              }
+            );
+
+            const now = Date.now();
+            const limit = 72 * 60 * 60 * 1000;
+
+            const overdue = issues.filter(issue => {
+              if (issue.pull_request) return false;
+              return now - new Date(issue.created_at).getTime() > limit;
+            });
+
+            const summary = overdue.length
+              ? overdue.map(issue =>
+                  `- #${issue.number}: ${issue.title}`
+                ).join("\n")
+              : "No overdue issues found.";
+
+            await core.summary
+              .addHeading("SLA Tracking Report")
+              .addRaw(`Open issues older than 72 hours: ${overdue.length}`)
+              .addRaw("\n\n")
+              .addRaw(summary)
+              .write();

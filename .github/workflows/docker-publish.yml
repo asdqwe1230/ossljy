@@ -36,5 +36,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./npm-package
+          file: ./npm-package/Dockerfile
           push: true
           tags: ghcr.io/asdqwe1230/ossljy-calculator:1.0.0

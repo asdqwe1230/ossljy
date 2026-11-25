@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-11-25T08:29:41.504115+00:00",
+  "collected_at": "2026-11-25T08:29:59.018383+00:00",
   "period_days": 7,
   "lead_time": {
     "average_hours": 0.19,
@@ -8,8 +8,8 @@
   "deployment_frequency_and_failure_rate": {
     "successful_deployments_7_days": 0,
     "deployments_per_day": 0.0,
-    "failed_deployments_7_days": 2,
-    "total_deployments_7_days": 2,
+    "failed_deployments_7_days": 3,
+    "total_deployments_7_days": 3,
     "change_failure_rate_percent": 100.0
   },
   "mttr": {

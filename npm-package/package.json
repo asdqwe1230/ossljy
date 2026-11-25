@@ -1,7 +1,6 @@
-
 {
   "name": "@asdqwe1230/ossljy-calculator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple calculator npm package",
   "main": "index.js",
   "scripts": {

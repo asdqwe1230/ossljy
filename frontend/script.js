@@ -97,25 +97,26 @@ function calculate() {
 
     let result;
 
-    switch (operator) {
-        case "add":
-            result = num1 + num2;
-            break;
-        case "subtract":
-            result = num1 - num2;
-            break;
-        case "multiply":
-            result = num1 * num2;
-            break;
-        case "divide":
-            if (num2 === 0) {
-                alert("0으로 나눌 수 없습니다.");
+    try {
+        switch (operator) {
+            case "add":
+                result = CalculatorCore.add(num1, num2);
+                break;
+            case "subtract":
+                result = CalculatorCore.subtract(num1, num2);
+                break;
+            case "multiply":
+                result = CalculatorCore.multiply(num1, num2);
+                break;
+            case "divide":
+                result = CalculatorCore.divide(num1, num2);
+                break;
+            default:
                 return;
-            }
-            result = num1 / num2;
-            break;
-        default:
-            return;
+        }
+    } catch (error) {
+        alert(error.message);
+        return;
     }
 
     document.getElementById("result").textContent = "결과: " + result;
@@ -134,11 +135,21 @@ function calculate() {
 
 // 계산 기록 저장
 function saveHistory(num1, operator, num2, result) {
-    const history = JSON.parse(localStorage.getItem("calculator_history") || "[]");
+    const history = JSON.parse(
+        localStorage.getItem("calculator_history") || "[]"
+    );
 
-    history.unshift(`${num1} ${operator} ${num2} = ${result}`);
+    const newRecord = `${num1} ${operator} ${num2} = ${result}`;
 
-    localStorage.setItem("calculator_history", JSON.stringify(history.slice(0, 10)));
+    const updatedHistory = CalculatorCore.addHistory(
+        history,
+        newRecord
+    );
+
+    localStorage.setItem(
+        "calculator_history",
+        JSON.stringify(updatedHistory)
+    );
 
     displayHistory();
 }
@@ -169,7 +180,7 @@ function calculateSquare() {
     }
 
     const value = Number(input);
-    const result = value * value;
+    const result = CalculatorCore.square(value);
 
     document.getElementById("scientific-result").textContent =
         "제곱 결과: " + result;
@@ -186,11 +197,14 @@ function calculateSquare() {
         localStorage.getItem("calculator_history") || "[]"
     );
 
-    history.unshift(`${value}² = ${result}`);
+    const updatedHistory = CalculatorCore.addHistory(
+        history,
+        `${value}² = ${result}`
+    );
 
     localStorage.setItem(
         "calculator_history",
-        JSON.stringify(history.slice(0, 10))
+        JSON.stringify(updatedHistory)
     );
 
     displayHistory();

@@ -102,5 +102,8 @@ describe("계산기 단위 테스트", () => {
         delete global.window;
     }
 });
+    test("덧셈은 음수도 올바르게 계산한다", () => {
+    expect(add(-10, 5)).toBe(-5);
+    });
 
 });

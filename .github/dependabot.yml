@@ -1,0 +1,47 @@
+
+version: 2
+
+updates:
+  # npm 패키지 의존성 관리
+  - package-ecosystem: "npm"
+    directory: "/npm-package"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        patterns:
+          - "*"
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "*"
+
+  # GitHub Actions 의존성 관리
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Docker 이미지 의존성 관리
+  - package-ecosystem: "docker"
+    directory: "/npm-package"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"

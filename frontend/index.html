@@ -1,20 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSSJY 웹 계산기</title>
+    <title>OSSJY Feature Flag 계산기</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <main class="container">
-        <h1>OSSJY 웹 계산기</h1>
-        <p>GitHub Pages 자동 배포 프로젝트</p>
+        <h1>OSSJY 계산기</h1>
+        <p>Feature Flag 및 A/B 테스트 실습</p>
 
         <section class="calculator">
+            <h2>기본 계산기</h2>
+
             <input type="number" id="num1" placeholder="첫 번째 숫자">
-            
+
             <select id="operator">
                 <option value="add">덧셈 (+)</option>
                 <option value="subtract">뺄셈 (-)</option>
@@ -24,12 +25,31 @@
 
             <input type="number" id="num2" placeholder="두 번째 숫자">
 
-            <button onclick="calculate()">계산하기</button>
+            <button id="calculate-button">계산하기</button>
 
-            <h2 id="result">결과: </h2>
+            <h2 id="result">결과:</h2>
+        </section>
+
+        <section id="scientific-section" class="feature-section">
+            <h2>공학용 계산 기능</h2>
+            <input type="number" id="scientific-number" placeholder="숫자 입력">
+            <button onclick="calculateSquare()">제곱 계산</button>
+            <p id="scientific-result"></p>
+        </section>
+
+        <section id="history-section" class="feature-section">
+            <h2>계산 기록</h2>
+            <ul id="history-list"></ul>
+        </section>
+
+        <section class="feature-section">
+            <h2>A/B 테스트</h2>
+            <p id="variant-info"></p>
+            <button id="download-events">실험 로그 다운로드</button>
         </section>
     </main>
 
+    <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,82 @@
+
+name: npm Security Audit
+
+on:
+  push:
+    branches:
+      - feature/packages-security
+    paths:
+      - 'npm-package/**'
+      - '.github/workflows/security-audit.yml'
+  pull_request:
+    branches:
+      - feature/packages-security
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: ./npm-package
+        run: npm ci
+
+      - name: Run npm audit
+        id: audit
+        working-directory: ./npm-package
+        continue-on-error: true
+        run: npm audit --json > audit-result.json
+
+      - name: Create security report
+        working-directory: ./npm-package
+        run: |
+          node -e "
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('audit-result.json', 'utf8'));
+          const v = audit.metadata?.vulnerabilities || {};
+          const report = [
+            '# npm Security Audit Report',
+            '',
+            '## Vulnerability Summary',
+            '',
+            '| Severity | Count |',
+            '|---|---:|',
+            ...['critical','high','moderate','low','info'].map(s => '| ' + s + ' | ' + (v[s] || 0) + ' |'),
+            '',
+            '## Result',
+            '',
+            (Number(v.total || 0) === 0 ? 'No vulnerabilities found.' : 'Vulnerabilities detected.')
+          ].join('\n');
+          fs.writeFileSync('audit-report.md', report);
+          console.log(report);
+          "
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-security-report
+          path: |
+            npm-package/audit-report.md
+            npm-package/audit-result.json
+
+      - name: Create GitHub Issue if vulnerabilities exist
+        if: steps.audit.outcome == 'failure' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "npm security vulnerabilities detected" \
+            --body "The npm audit workflow detected vulnerabilities. Please check the npm-security-report artifact in GitHub Actions."

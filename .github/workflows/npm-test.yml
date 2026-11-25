@@ -1,0 +1,32 @@
+
+name: npm Test
+
+on:
+  pull_request:
+    branches:
+      - feature/packages-security
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: ./npm-package
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./npm-package
+        run: npm test

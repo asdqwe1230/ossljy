@@ -1,0 +1,29 @@
+{
+  "name": "ossljy",
+  "version": "1.0.0",
+  "description": "Git과 GitHub 사용법을 연습하기 위한 저장소입니다.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asdqwe1230/ossljy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/asdqwe1230/ossljy/issues"
+  },
+  "homepage": "https://github.com/asdqwe1230/ossljy#readme",
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2"
+  }
+}

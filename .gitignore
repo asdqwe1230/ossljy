@@ -1,0 +1,11 @@
+# Node.js
+node_modules/
+coverage/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env

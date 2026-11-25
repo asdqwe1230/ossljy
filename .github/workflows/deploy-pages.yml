@@ -1,0 +1,94 @@
+
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - feature/github-pages-deploy
+      - feature/feature-flags-ab-testing
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-pages.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Generate Feature Flag configuration
+        env:
+          FLAG_DARK_MODE: ${{ vars.FLAG_DARK_MODE || 'true' }}
+          FLAG_SCIENTIFIC: ${{ vars.FLAG_SCIENTIFIC || 'true' }}
+          FLAG_HISTORY: ${{ vars.FLAG_HISTORY || 'true' }}
+          EXPERIMENT_ENABLED: ${{ vars.EXPERIMENT_ENABLED || 'true' }}
+          EXPERIMENT_SPLIT: ${{ vars.EXPERIMENT_SPLIT || '50' }}
+        run: |
+          DARK_MODE=false
+          SCIENTIFIC=false
+          HISTORY=false
+          EXPERIMENT=false
+
+          [ "$FLAG_DARK_MODE" = "true" ] && DARK_MODE=true
+          [ "$FLAG_SCIENTIFIC" = "true" ] && SCIENTIFIC=true
+          [ "$FLAG_HISTORY" = "true" ] && HISTORY=true
+          [ "$EXPERIMENT_ENABLED" = "true" ] && EXPERIMENT=true
+
+          SPLIT="$EXPERIMENT_SPLIT"
+
+          if ! [[ "$SPLIT" =~ ^[0-9]+$ ]] || [ "$SPLIT" -gt 100 ]; then
+            echo "EXPERIMENT_SPLIT must be between 0 and 100"
+            exit 1
+          fi
+
+          cat > frontend/config.js <<EOF
+          window.APP_CONFIG = {
+              FLAG_DARK_MODE: $DARK_MODE,
+              FLAG_SCIENTIFIC: $SCIENTIFIC,
+              FLAG_HISTORY: $HISTORY,
+              EXPERIMENT_ENABLED: $EXPERIMENT,
+              EXPERIMENT_NAME: "calculator-button-test",
+              EXPERIMENT_SPLIT: $SPLIT
+          };
+          EOF
+
+      - name: Upload website files
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './frontend'
+
+  deploy:
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

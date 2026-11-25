@@ -1,0 +1,35 @@
+
+name: Publish npm Package
+
+on:
+  push:
+    branches:
+      - feature/packages-security
+    paths:
+      - 'npm-package/package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@asdqwe1230'
+
+      - name: Publish package
+        working-directory: ./npm-package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

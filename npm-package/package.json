@@ -1,0 +1,18 @@
+
+{
+  "name": "@asdqwe1230/ossljy-calculator",
+  "version": "1.0.0",
+  "description": "A simple calculator npm package",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asdqwe1230/ossljy.git"
+  },
+  "license": "MIT"
+}

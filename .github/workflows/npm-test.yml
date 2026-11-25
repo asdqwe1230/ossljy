@@ -2,9 +2,6 @@
 name: npm Test
 
 on:
-  push:
-    branches:
-      - feature/packages-security
   pull_request:
     branches:
       - feature/packages-security

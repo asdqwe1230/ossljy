@@ -1,3 +1,4 @@
+
 // Feature Flag 설정
 const flags = window.APP_CONFIG;
 
@@ -37,9 +38,17 @@ function assignVariant() {
 
 const variant = assignVariant();
 
+// 마지막 계산 시작 시간
+let calculationStartTime = null;
+
+// 마지막 계산 결과
+let lastResult = null;
+
 // 이벤트 기록
 function trackEvent(eventName, details = {}) {
-    const events = JSON.parse(localStorage.getItem("experiment_events") || "[]");
+    const events = JSON.parse(
+        localStorage.getItem("experiment_events") || "[]"
+    );
 
     events.push({
         userId: getUserId(),
@@ -50,6 +59,24 @@ function trackEvent(eventName, details = {}) {
     });
 
     localStorage.setItem("experiment_events", JSON.stringify(events));
+}
+
+// 오류 메시지 표시
+function showError(message) {
+    if (variant === "B") {
+        document.getElementById("error-message").textContent = message;
+    } else {
+        alert(message);
+    }
+
+    trackEvent("validation_error", {
+        message: message
+    });
+}
+
+// 오류 메시지 초기화
+function clearError() {
+    document.getElementById("error-message").textContent = "";
 }
 
 // Feature Flag 적용
@@ -68,17 +95,26 @@ function initializeFeatures() {
         "현재 A/B 테스트 버전: " + variant;
 
     const button = document.getElementById("calculate-button");
+    const copyButton = document.getElementById("copy-result-button");
 
     if (variant === "A") {
         button.textContent = "계산하기";
+        copyButton.style.display = "none";
     } else {
         button.textContent = "결과 확인하기";
+        copyButton.style.display = "block";
     }
 
-    trackEvent("experiment_assigned", {
-        experiment: flags.EXPERIMENT_NAME,
-        variant: variant
-    });
+    const assignmentKey = "assignment_logged_" + flags.EXPERIMENT_NAME;
+
+    if (!localStorage.getItem(assignmentKey)) {
+        trackEvent("experiment_assigned", {
+            experiment: flags.EXPERIMENT_NAME,
+            variant: variant
+        });
+
+        localStorage.setItem(assignmentKey, "true");
+}
 }
 
 // 계산 기능
@@ -90,8 +126,19 @@ function calculate() {
     const num2 = Number(input2);
     const operator = document.getElementById("operator").value;
 
+    if (calculationStartTime === null) {
+        calculationStartTime = Date.now();
+    }
+
+    trackEvent("calculation_attempt");
+
     if (input1 === "" || input2 === "") {
-        alert("숫자를 모두 입력해 주세요.");
+        showError("첫 번째 숫자와 두 번째 숫자를 모두 입력해 주세요.");
+        return;
+    }
+
+    if (!Number.isFinite(num1) || !Number.isFinite(num2)) {
+        showError("올바른 숫자를 입력해 주세요.");
         return;
     }
 
@@ -109,45 +156,82 @@ function calculate() {
             break;
         case "divide":
             if (num2 === 0) {
-                alert("0으로 나눌 수 없습니다.");
+                showError("0으로 나눌 수 없습니다. 다른 숫자를 입력해 주세요.");
                 return;
             }
             result = num1 / num2;
             break;
         default:
+            showError("올바른 연산을 선택해 주세요.");
             return;
     }
 
+    clearError();
+
+    lastResult = result;
+
     document.getElementById("result").textContent = "결과: " + result;
 
-    trackEvent("calculation", {
+    const elapsedTime = Date.now() - calculationStartTime;
+
+    trackEvent("calculation_success", {
         num1: num1,
         num2: num2,
         operator: operator,
-        result: result
+        result: result,
+        elapsedTimeMs: elapsedTime
     });
+
+    calculationStartTime = null;
 
     if (flags.FLAG_HISTORY) {
         saveHistory(num1, operator, num2, result);
     }
 }
 
+// 결과 복사 기능
+async function copyResult() {
+    if (variant !== "B" || lastResult === null) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(String(lastResult));
+
+        trackEvent("result_copied", {
+            result: lastResult
+        });
+
+        document.getElementById("copy-result-button").textContent =
+            "복사 완료!";
+    } catch (error) {
+        showError("결과 복사에 실패했습니다. 브라우저 권한을 확인해 주세요.");
+    }
+}
+
 // 계산 기록 저장
 function saveHistory(num1, operator, num2, result) {
-    const history = JSON.parse(localStorage.getItem("calculator_history") || "[]");
+    const history = JSON.parse(
+        localStorage.getItem("calculator_history") || "[]"
+    );
 
     history.unshift(`${num1} ${operator} ${num2} = ${result}`);
 
-    localStorage.setItem("calculator_history", JSON.stringify(history.slice(0, 10)));
+    localStorage.setItem(
+        "calculator_history",
+        JSON.stringify(history.slice(0, 10))
+    );
 
     displayHistory();
 }
 
 // 계산 기록 화면 표시
 function displayHistory() {
-    const history = JSON.parse(localStorage.getItem("calculator_history") || "[]");
-    const list = document.getElementById("history-list");
+    const history = JSON.parse(
+        localStorage.getItem("calculator_history") || "[]"
+    );
 
+    const list = document.getElementById("history-list");
     list.innerHTML = "";
 
     history.forEach(item => {
@@ -174,14 +258,12 @@ function calculateSquare() {
     document.getElementById("scientific-result").textContent =
         "제곱 결과: " + result;
 
-    // 실험 이벤트 기록
     trackEvent("scientific_calculation", {
         operation: "square",
         input: value,
         result: result
     });
 
-    // 계산 기록에 추가
     const history = JSON.parse(
         localStorage.getItem("calculator_history") || "[]"
     );
@@ -198,7 +280,9 @@ function calculateSquare() {
 
 // 실험 로그 다운로드
 function downloadEvents() {
-    const events = JSON.parse(localStorage.getItem("experiment_events") || "[]");
+    const events = JSON.parse(
+        localStorage.getItem("experiment_events") || "[]"
+    );
 
     const blob = new Blob(
         [JSON.stringify(events, null, 2)],
@@ -213,6 +297,7 @@ function downloadEvents() {
     link.click();
 
     URL.revokeObjectURL(url);
+
     trackEvent("event_log_downloaded");
 }
 
@@ -222,9 +307,17 @@ document.addEventListener("DOMContentLoaded", () => {
     displayHistory();
 
     document.getElementById("calculate-button").addEventListener("click", () => {
-    trackEvent("calculate_button_clicked");
-    calculate();
-});
+        trackEvent("calculate_button_clicked");
+        calculate();
+    });
 
-    document.getElementById("download-events").addEventListener("click", downloadEvents);
+    document.getElementById("copy-result-button").addEventListener(
+        "click",
+        copyResult
+    );
+
+    document.getElementById("download-events").addEventListener(
+        "click",
+        downloadEvents
+    );
 });

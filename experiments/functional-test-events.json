@@ -1,0 +1,91 @@
+[
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "experiment_assigned",
+    "details": {
+      "experiment": "calculator-button-test",
+      "variant": "B"
+    },
+    "timestamp": "2026-11-26T02:11:11.720Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "experiment_assigned",
+    "details": {
+      "experiment": "calculator-button-test",
+      "variant": "B"
+    },
+    "timestamp": "2026-11-26T02:13:04.732Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "experiment_assigned",
+    "details": {
+      "experiment": "calculator-button-test",
+      "variant": "B"
+    },
+    "timestamp": "2026-11-26T02:13:13.257Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "calculate_button_clicked",
+    "details": {},
+    "timestamp": "2026-11-26T02:13:45.138Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "calculation_attempt",
+    "details": {},
+    "timestamp": "2026-11-26T02:13:45.138Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "calculation_success",
+    "details": {
+      "num1": 125,
+      "num2": 375,
+      "operator": "add",
+      "result": 500,
+      "elapsedTimeMs": 0
+    },
+    "timestamp": "2026-11-26T02:13:45.139Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "calculate_button_clicked",
+    "details": {},
+    "timestamp": "2026-11-26T02:13:47.860Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "calculation_attempt",
+    "details": {},
+    "timestamp": "2026-11-26T02:13:47.860Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "validation_error",
+    "details": {
+      "message": "첫 번째 숫자와 두 번째 숫자를 모두 입력해 주세요."
+    },
+    "timestamp": "2026-11-26T02:13:47.860Z"
+  },
+  {
+    "userId": "user-wt4ls0siha",
+    "variant": "B",
+    "event": "result_copied",
+    "details": {
+      "result": 500
+    },
+    "timestamp": "2026-11-26T02:13:56.758Z"
+  }
+]

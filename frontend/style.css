@@ -113,3 +113,20 @@ body.dark-mode #history-list {
 body.dark-mode p {
     color: #cbd5e1;
 }
+
+/* A/B 테스트: B 그룹 오류 안내 */
+#error-message {
+    color: #dc2626;
+    font-weight: bold;
+    margin-top: 10px;
+    min-height: 20px;
+}
+
+/* 결과 복사 버튼 */
+#copy-result-button {
+    background: #16a34a;
+}
+
+#copy-result-button:hover {
+    background: #15803d;
+}

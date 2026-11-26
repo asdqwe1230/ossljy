@@ -6,6 +6,7 @@ on:
     branches:
       - feature/github-pages-deploy
       - feature/feature-flags-ab-testing
+      - feature/user-scenario-experiment
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-pages.yml'
